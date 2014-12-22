@@ -1,5 +1,6 @@
 local win = require "/Lib/screen"
 local maths = require "/Lib/maths"
+local namegen = require "/Lib/namegen"
 local menu = require "/Game Windows/menu"
 local play = require "/Game Windows/player"
 local map = require "/Game Windows/minimap"
@@ -7,7 +8,7 @@ local ec = require "/Game Windows/economy"
 
 --SWITCHES--
 
-dbgBool = true
+dbgBool = false
 
 --VARIABLES--
 
@@ -24,13 +25,18 @@ uni.isPaused = true
 uni.player = "Human"
 uni.mapChoice = 2
 uni.mapSize = 800
+uni.maxMoons = 10
+uni.moonChance = 5
 uni.starChance = 5000
 uni.lifeChance = 20
 uni.starClumping = 6000
-uni.planetMinRad = 3000
-uni.planetMaxRad = 8000
-uni.statMinRad = 750
-uni.statMaxRad = 1500
+uni.planetMinRad = 5000
+uni.planetMaxRad = 25000
+uni.minMoonRad = 750
+uni.moonSpacing = 250
+uni.atmoChance = 20
+uni.statMinRad = 50
+uni.statMaxRad = 150
 uni.maxStartShips = 50
 uni.stationTimer = 0
 uni.stationTick = 10
@@ -126,18 +132,35 @@ end
 
 function addPlanets(path)
 	local list = love.filesystem.getDirectoryItems(path)
-    local count = 0
+  local count = 0
 	if uni.pTypes == nil then
-    	uni.pTypes = {}
-    else
-    	count = #uni.pTypes
-    end
-    for _, v in ipairs(list) do
-        count = count + 1
-        local file = path.."/"..string.sub(v, 1, #v - 4)
-        uni.pTypes[count] = require(file)
-        gameUtils.debug("Adding "..path.."/"..v)
-    end
+    uni.pTypes = {}
+  else
+    count = #uni.pTypes
+  end
+  for _, v in ipairs(list) do
+    count = count + 1
+    local file = path.."/"..string.sub(v, 1, #v - 4)
+    uni.pTypes[count] = require(file)
+    gameUtils.debug("Adding "..path.."/"..v)
+  end
+	gameUtils.debug("All planets added from "..path..".")
+end
+
+function addMoons(path)
+  local list = love.filesystem.getDirectoryItems(path)
+  local count = 0
+	if uni.mTypes == nil then
+    uni.mTypes = {}
+  else
+    count = #uni.mTypes
+  end
+  for _, v in ipairs(list) do
+    count = count + 1
+    local file = path.."/"..string.sub(v, 1, #v - 4)
+    uni.mTypes[count] = require(file)
+    gameUtils.debug("Adding "..path.."/"..v)
+  end
 	gameUtils.debug("All planets added from "..path..".")
 end
 
@@ -262,20 +285,21 @@ end
 
 function loadResources(path)
 	local list = love.filesystem.getDirectoryItems(path)
-    for _, v in ipairs(list) do
-    	local data = path.."/"..v.."/"
-        addMaps(data.."Mapgen")
-        addItems(data.."Items")
-        addEquipment(data.."Equipment")
-        addShips(data.."Ships")
-        addStations(data.."Stations")
-        addPlanets(data.."Planets")
-        addStars(data.."Stars")
-        addScenarios(data.."Scenarios")
-        addRaces(data.."Races")
-        addFactionAi(data.."Faction AI")
-        addStationAi(data.."Station AI")
-    end
+  for _, v in ipairs(list) do
+    local data = path.."/"..v.."/"
+    addMaps(data.."Mapgen")
+    addItems(data.."Items")
+    addEquipment(data.."Equipment")
+    addShips(data.."Ships")
+    addStations(data.."Stations")
+    addPlanets(data.."Planets")
+    addMoons(data.."Moons")
+    addStars(data.."Stars")
+    addScenarios(data.."Scenarios")
+    addRaces(data.."Races")
+    addFactionAi(data.."Faction AI")
+    addStationAi(data.."Station AI")
+  end
 	gameUtils.debug("All resources added.")
 end
 
@@ -334,19 +358,22 @@ function gameUtils.checkOpen(id)
 end
 
 function gameUtils.closeWindow(wId)
-	local cWinMax = #cWin
-	cWin[wId] = nil
-	local newTab = {}
-	local count = 1
-  if wId < 6 then cWin[wId].isVisible = false end
-	for i = 6, cWinMax do
-		if cWin[i] ~= nil then
-			newTab[count] = cWin[i]
-			newTab[count].id = count
-			count = count + 1
-		end
-	end
-	cWin = newTab
+  if wId < 6 then
+    cWin[wId].isVisible = false
+  else
+    local cWinMax = #cWin
+    local newTab = {}
+    local count = 1
+    cWin[wId] = nil
+    for i = 1, cWinMax do
+      if cWin[i] ~= nil then
+        newTab[count] = cWin[i]
+        newTab[count].id = count
+        count = count + 1
+      end
+    end
+    cWin = newTab
+  end
 end
 
 function gameUtils.sortPriority()
@@ -550,6 +577,12 @@ function uni.planetClassLookup(class)
     end
 end
 
+function uni.moonClassLookup(class)
+  for i = 1, #uni.mTypes do
+    if uni.mTypes[i].class == class then return i end
+  end
+end
+
 function uni.stellarClassLookup(class)
     for i = 1, #uni.starTypes do
         if uni.starTypes[i].class == class then return i end
@@ -662,7 +695,7 @@ function uni.spawnStation(name, class, radius, homePlanet, faction, x, y)
     uni.ent[uni.eCnt].x = x + uni.ent[uni.eCnt].tw / 2
     uni.ent[uni.eCnt].y = y + uni.ent[uni.eCnt].th / 2
     uni.ent[uni.eCnt].id = uni.eCnt
-    uni.ent[uni.eCnt].rad = radius
+    uni.ent[uni.eCnt].rad = radius * uni.ent[homePlanet].scale
     uni.ent[uni.eCnt].homePlanetId = homePlanet
     uni.ent[uni.eCnt].homeStarId = uni.ent[homePlanet].homeStarId
     uni.ent[uni.eCnt].ai = uni.equipItem(uni.eCnt, "Supplier AI")
@@ -709,11 +742,33 @@ end
 
 function uni.spawnPlanet(name, class, radius, homeStar, faction, x, y)
 	uni.incrementTable()
-    local id = uni.planetClassLookup(class)
-	uni.ent[uni.eCnt] = uni.pTypes[id]:spawnPlanet(uni.ent[uni.eCnt], name, faction, x, y)
+  local myId = uni.eCnt
+  local id = uni.planetClassLookup(class)
+	uni.ent[myId] = uni.pTypes[id]:spawnPlanet(uni.ent[uni.eCnt], name, faction, x, y)
+	uni.ent[myId].id = myId
+	uni.ent[myId].rad = radius
+	uni.ent[myId].homeStarId = homeStar
+  local rad = uni.minMoonRad * uni.ent[myId].scale
+  for i = 1, uni.maxMoons do
+    local mChance = math.random(1, uni.moonChance)
+    if mChance == uni.moonChance then
+      local angle = math.random(0, 359)
+      local xPos, yPos = uni.ent[myId].x + (rad * math.cos(angle)), (uni.ent[myId].y + (rad * math.sin(angle)) / 2)
+      local rcl = math.random(1, #uni.mTypes)
+      local mClass = uni.mTypes[rcl].class
+      uni.spawnMoon(namegen.randomName(), mClass, rad, myId, faction, xPos, yPos)
+      rad = (rad + math.random(uni.moonSpacing / 3, uni.moonSpacing) * uni.ent[myId].scale)
+    end
+  end
+end
+
+function uni.spawnMoon(name, class, radius, homePlanet, faction, x, y)
+  uni.incrementTable()
+  local id = uni.moonClassLookup(class)
+	uni.ent[uni.eCnt] = uni.mTypes[id]:spawnMoon(name, faction, x, y)
 	uni.ent[uni.eCnt].id = uni.eCnt
 	uni.ent[uni.eCnt].rad = radius
-	uni.ent[uni.eCnt].homeStarId = homeStar
+  uni.ent[uni.eCnt]:setHome(homePlanet)
 end
 
 function uni.spawnStar(name, class, faction, x, y, ang)
@@ -861,11 +916,11 @@ function love.mousepressed(x, y, button)
               uni.clearSelected(i)
               if not gameUtils.checkOpen(i) then
                 gameUtils.sortPriority()
-                  cWin[#cWin + 1] = uni.ent[i]:info(#cWin + 1)
-                end
-                return true
-              elseif button == "r" then
-                if uni.ent[i].type == "station" or uni.ent[i].type == "planet" then
+                cWin[#cWin + 1] = uni.ent[i]:info(#cWin + 1)
+              end
+              return true
+            elseif button == "r" then
+              if uni.ent[i].type == "station" or uni.ent[i].type == "planet" then
                 local list = uni.gatherSelectedTable()
                 for j = 1, #list do
                   if uni.ent[list[j]].type == "ship" then
@@ -985,8 +1040,8 @@ function love.keypressed(key)
   elseif love.keyboard.isDown("rctrl") or love.keyboard.isDown("lctrl") then
     if key == "d" then
       dbgBool = not dbgBool
-      cWin[5].isVisible = dbgBool
-      cWin[5]:render()
+      cWin[2].isVisible = dbgBool
+      cWin[2]:render()
     end
 	end
 end
@@ -1117,6 +1172,22 @@ function drawMap()
               love.graphics.draw(uni.planSet, uni.ent[i].shadeImage, pxOf, pyOf, uni.ent[i].shadeAng, uni.ent[i].scale, uni.ent[i].scale, offx, offy)
               love.graphics.setColor(0x99, 0x99, 0x99, 0x33)
               local hStar = uni.ent[i].homeStarId
+              pxOf, pyOf = uni.getScreenCoordinates(uni.ent[hStar].x, uni.ent[hStar].y)
+              love.graphics.circle("line", pxOf, pyOf, uni.ent[i].rad, 360)
+              love.graphics.setColor(0xFF, 0xFF, 0xFF, 0xFF)
+            elseif uni.ent[i].type == "moon" then
+              offx = (uni.ent[i].tw / uni.ent[i].scale) / 2
+              offy = (uni.ent[i].th / uni.ent[i].scale) / 2
+              love.graphics.setColor(uni.ent[i].wr, uni.ent[i].wg, uni.ent[i].wb, 0xFF)
+              love.graphics.draw(uni.planSet, uni.ent[i].waterImage, pxOf, pyOf, angle, uni.ent[i].scale, uni.ent[i].scale, offx, offy)
+              love.graphics.setColor(uni.ent[i].lr, uni.ent[i].lg, uni.ent[i].lb, 0xFF)
+              love.graphics.draw(uni.planSet, uni.ent[i].landImage, pxOf, pyOf, uni.ent[i].landAng, uni.ent[i].scale, uni.ent[i].scale, offx, offy)
+              love.graphics.setColor(uni.ent[i].ar, uni.ent[i].ag, uni.ent[i].ab, 0xFF)
+              love.graphics.draw(uni.planSet, uni.ent[i].cloudImage, pxOf, pyOf, uni.ent[i].cloudAng, uni.ent[i].scale, uni.ent[i].scale, offx, offy)
+              love.graphics.setColor(0xFF, 0xFF, 0xFF, 0xFF)
+              love.graphics.draw(uni.planSet, uni.ent[i].shadeImage, pxOf, pyOf, uni.ent[i].shadeAng, uni.ent[i].scale, uni.ent[i].scale, offx, offy)
+              love.graphics.setColor(0x99, 0x99, 0x99, 0x33)
+              local hStar = uni.ent[i].home
               pxOf, pyOf = uni.getScreenCoordinates(uni.ent[hStar].x, uni.ent[hStar].y)
               love.graphics.circle("line", pxOf, pyOf, uni.ent[i].rad, 36)
               love.graphics.setColor(0xFF, 0xFF, 0xFF, 0xFF)

@@ -163,7 +163,7 @@ function fact:init()
 			local rPl = math.random(1, #uni.ent[hSys].plTab)
 			local plId = uni.ent[hSys].plTab[rPl]
 			local stName = uni.items[i].name.." "..stClass
-			local rad = math.random(uni.statMinRad, uni.statMaxRad)
+			local rad = math.random(uni.statMinRad, uni.statMaxRad) * (1 / uni.ent[plId].scale)
 			local angle = math.random(0, 359)
 			local px = uni.ent[plId].x
 			local py = uni.ent[plId].y

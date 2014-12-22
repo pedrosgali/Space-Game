@@ -167,7 +167,7 @@ function stat:addEqSlot(slot)
 end
 
 function stat:update(dt)
-    self.heading = self.heading + (((50000 - self.rad) / 100000000) * uni.gameSpeed)
+    self.heading = self.heading + (((50000 - self.rad) / 10000000) * uni.gameSpeed)
     self.vizHeading = self.vizHeading + self.turn
     if self.sp < self.spMax then
         self.sp = math.min(self.sp + (self.shRecharge * dt), self.spMax)

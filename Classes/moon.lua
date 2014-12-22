@@ -1,85 +1,74 @@
 local win = require "/Lib/screen"
-local maths = require "/Lib/maths"
 
-local planet = {}
+local moon = {}
 
-function planet:spawnPlanet(newStar)
-  local newPlanet = newPlanet or {}
-  setmetatable(newPlanet, self)
+function moon:spawnMoon()
+  local newMoon = {}
+  setmetatable(newMoon, self)
   self.__index = self
-  newPlanet.xVel = 0
-  newPlanet.yVel = 0
-  newPlanet.tgtx = "none"
-  newPlanet.tgty = "none"
-  newPlanet.scrx = "none"
-  newPlanet.scry = "none"
-  newPlanet.docked = 0
-  newPlanet.docking = 0
-  newPlanet.state = "Idle"
-  newPlanet.turn = math.random(0, 1)
-  newPlanet.wind = math.random(1, 5) / 50
-  newPlanet.spin = math.random(1, 10) / 50
-  newPlanet.cloudAng = 0
-  newPlanet.landAng = 0
-  newPlanet.shadeAng = 0
-  newPlanet.tw = 305
-  newPlanet.th = 305
-  newPlanet.waterImage = love.graphics.newQuad(1, 1, newPlanet.tw, newPlanet.th, uni.planSet:getDimensions())
-  newPlanet.landImage = love.graphics.newQuad(306, 1, newPlanet.tw, newPlanet.th, uni.planSet:getDimensions())
-  newPlanet.cloudImage = love.graphics.newQuad(611, 1, newPlanet.tw, newPlanet.th, uni.planSet:getDimensions())
-  newPlanet.shadeImage = love.graphics.newQuad(916, 1, newPlanet.tw, newPlanet.th, uni.planSet:getDimensions())
-  newPlanet.scale = math.random(100, 250) / 100
-  return newPlanet
+  newMoon.xVel = 0
+  newMoon.yVel = 0
+  newMoon.turn = math.random(0, 1)
+  newMoon.wind = math.random(1, 5) / 50
+  newMoon.spin = math.random(1, 10) / 50
+  newMoon.cloudAng = 0
+  newMoon.landAng = 0
+  newMoon.shadeAng = 0
+  newMoon.tw = 305
+  newMoon.th = 305
+  newMoon.waterImage = love.graphics.newQuad(1, 1, newMoon.tw, newMoon.th, uni.planSet:getDimensions())
+  newMoon.landImage = love.graphics.newQuad(306, 1, newMoon.tw, newMoon.th, uni.planSet:getDimensions())
+  newMoon.cloudImage = love.graphics.newQuad(611, 1, newMoon.tw, newMoon.th, uni.planSet:getDimensions())
+  newMoon.shadeImage = love.graphics.newQuad(916, 1, newMoon.tw, newMoon.th, uni.planSet:getDimensions())
+  newMoon.scale = math.random(25, 33) / 100
+  return newMoon
 end
 
-function planet:generateAtmosphere()
+function moon:generateAtmosphere()
+  local rnd = math.random(1, uni.atmoChance)
+  if rnd == uni.atmoChance then
     self.atmo = uni.randomAtmo()
+  else
+    self.atmo = "None"
+  end
 end
 
-function planet:setAtmoColour(atmo)
-    if atmo == "Oxygen" then
-        self.ar = 255
-        self.ag = 255
-        self.ab = 255
-    elseif atmo == "Hydrogen" then
-        self.ar = math.random(127, 255)
-        self.ag = 0
-        self.ab = 0
-    elseif atmo == "Helium" then
-        self.ar = math.random(127, 255)
-        self.ag = math.random(127, 255)
-        self.ab = 0
-    elseif atmo == "Boron" then
-        self.ar = 0
-        self.ag = math.random(127, 255)
-        self.ab = math.random(127, 255)
-    end
+function moon:setAtmoColour(atmo)
+  if atmo == "Oxygen" then
+    self.ar = 255
+    self.ag = 255
+    self.ab = 255
+  elseif atmo == "Hydrogen" then
+    self.ar = math.random(127, 255)
+    self.ag = 0
+    self.ab = 0
+  elseif atmo == "Helium" then
+    self.ar = math.random(127, 255)
+    self.ag = math.random(127, 255)
+    self.ab = 0
+  elseif atmo == "Boron" then
+    self.ar = 0
+    self.ag = math.random(127, 255)
+    self.ab = math.random(127, 255)
+  else
+    self.ar = 255
+    self.ag = 255
+    self.ab = 255
+  end
 end
 
-function planet:randomizeColour()
-    self.wr = math.random(0, 255)
-    self.wg = math.random(0, 255)
-    self.wb = math.random(0, 255)
-    self.lr = math.random(0, 255)
-    self.lg = math.random(0, 255)
-    self.lb = math.random(0, 255)
-    self.ar = math.random(0, 255)
-    self.ag = math.random(0, 255)
-    self.ab = math.random(0, 255)
+function moon:setHome(id)
+  self.home = id
+  self.homeStarId = uni.ent[id].homeStarId
 end
 
-function planet:addStation(id)
-    local count = 1
-    if self.stTab == nil then
-        self.stTab = {}
-    else
-        count = #self.stTab + 1
-    end
-    self.stTab[count] = id
+function moon:move(dt)
+  self.x = uni.ent[self.home].x + (self.rad * math.cos(self.heading))
+	self.y = uni.ent[self.home].y + (self.rad * math.sin(self.heading))
 end
 
-function planet:update(dt)
-	self.heading = self.heading + (((50000 - self.rad) / 1000000000) * uni.gameSpeed)
+function moon:update(dt)
+  self.heading = self.heading + (((25000 - self.rad) / 100000000) * uni.gameSpeed)
   self.cloudAng = self.cloudAng - ((self.spin + self.wind) * dt) * uni.gameSpeed
   self.landAng = self.landAng + (self.spin * dt) * uni.gameSpeed
   local dx = uni.ent[self.homeStarId].x - self.x
@@ -88,12 +77,7 @@ function planet:update(dt)
   self.shadeAng = math.rad(bearing + 135)
 end
 
-function planet:move(dt)
-	self.x = uni.ent[self.homeStarId].x + (self.rad * math.cos(self.heading))
-	self.y = uni.ent[self.homeStarId].y + (self.rad * math.sin(self.heading))
-end
-
-function planet:info(id)
+function moon:info(id)
     local info = win:newPane(info, 220, 340)
     info.shipId = self.id
     info.id = id
@@ -176,4 +160,4 @@ function planet:info(id)
     return info
 end
 
-return planet
+return moon
