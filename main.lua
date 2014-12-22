@@ -32,7 +32,7 @@ uni.lifeChance = 20
 uni.starClumping = 6000
 uni.planetMinRad = 5000
 uni.planetMaxRad = 25000
-uni.minMoonRad = 750
+uni.minMoonRad = 500
 uni.moonSpacing = 250
 uni.atmoChance = 20
 uni.statMinRad = 50
@@ -303,6 +303,7 @@ function loadResources(path)
 	gameUtils.debug("All resources added.")
 end
 
+
 --GAME UTILITY SETUP--
 
 function gameUtils.debug(message, clear)
@@ -440,6 +441,7 @@ function gameUtils.newGame(id)
   uni.isPaused = false
 end
 
+
 --UNIVERSE FUNCTIONS SETUP--
 --Map/Camera functions...
 
@@ -525,6 +527,7 @@ function uni.gatherSelectedTable(faction)
 	end
 	return rTab
 end
+
 
 --Class lookups etc...
 
@@ -640,6 +643,7 @@ function uni.countEntities()
     gameUtils.debug("Ships    : "..shipCount)
   end
 end
+
 --Spawning functions...
 
 function uni.incrementTable()
@@ -781,6 +785,7 @@ function uni.spawnStar(name, class, faction, x, y, ang)
 	uni.ent[uni.eCnt]:generateSystem()
 end
 
+
 --Update and economy stuff...
 
 function uni.gatherStarProduction(id)
@@ -867,6 +872,7 @@ function uni.updateFactions()
 		--uni.factions[i].ai:turn()
 	end
 end
+
 
 --CALLBACK FUNCTIONS--
 
@@ -1109,6 +1115,7 @@ function love.update(dt)
 	end
 	checkMouseScroll(dt)
 end
+
 
 --RENDERING--
 

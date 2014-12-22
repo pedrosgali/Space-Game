@@ -367,7 +367,7 @@ function screen:dropdownClicked(x, y)
 								if y >= ymin and y <= ymax then
 									self.ddTab[i].returnVal = self.ddTab[i].list[j].returnVal
 									self.ddTab[i].open = false
-									return self.ddTab[i].list[j].returnVal
+									return self.ddTab[i].list[j].returnVal, i
 								end
 							else
 								self.ddTab[i].open = false
