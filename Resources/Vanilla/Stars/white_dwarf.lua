@@ -30,14 +30,14 @@ function star:spawnStar(newStar, name, faction, x, y)
 	setmetatable(newStar, self)
 	self.__index = self
 	newStar.name = string.sub(self.type, 1, 2).."_"..string.sub(self.class, 1, 1)..tostring(#uni.ent + 1)..string.sub(self.class, 2, 2)
-    newStar.faction = faction
-    newStar.heading = 0
-    newStar.vizHeading = 0
-    newStar.bearing = 0
-    newStar.tw = math.random(600, 1200)
+  newStar.faction = faction
+  newStar.heading = 0
+  newStar.vizHeading = 0
+  newStar.bearing = 0
+  newStar.tw = math.random(1200, 2000)
 	newStar.th = newStar.tw
-    newStar.x = x + (newStar.tw / 2)
-    newStar.y = y + (newStar.th / 2)
+  newStar.x = x + (newStar.tw / 2)
+  newStar.y = y + (newStar.th / 2)
 	newStar.isVisible = true
 	newStar.xVel = 0
 	newStar.yVel = 0
