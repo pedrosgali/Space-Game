@@ -43,16 +43,16 @@ end
 
 function star:generateSystem()
     self.plTab = {}
-    local rad = math.random(uni.planetMinRad + 500, uni.planetMaxRad)
+    local rad = math.random(uni.planetMinRad, uni.planetMaxRad)
 	for i = 1, self.maxPlanets do
 		local angle = math.random(0, 359)
-        local x, y = self.x + (rad * math.cos(angle)), (self.y + (rad * math.sin(angle)) / 2)
-        local rcl = self:findAppropriatePlanet(rad)
-        local class = uni.pTypes[rcl].class
-        local rName = names.randomName()
-        uni.spawnPlanet(rName, class, rad, self.id, uni.player, x, y)
-        rad = rad + math.random(uni.planetMinRad, uni.planetMaxRad)
-        self.plTab[i] = uni.eCnt
+    local x, y = self.x + (rad * math.cos(angle)), (self.y + (rad * math.sin(angle)) / 2)
+    local rcl = self:findAppropriatePlanet(rad)
+    local class = uni.pTypes[rcl].class
+    local rName = names.randomName()
+    uni.spawnPlanet(rName, class, rad, self.id, uni.player, x, y)
+    rad = rad + math.random(uni.planetMinRad, uni.planetMaxRad)
+    self.plTab[i] = uni.eCnt
 	end
     local lifeChance = math.random(1, uni.lifeChance)
     if lifeChance == uni.lifeChance then

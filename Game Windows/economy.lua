@@ -187,6 +187,8 @@ function pData:newSheet(id)
             self.data = nil
             self.data = self:gatherData(self.stId)
           end
+          self.stLine = 1
+          return true
 				end
 				ret = self:buttonClicked(x, y)
 				if ret ~= false then

@@ -183,7 +183,7 @@ end
 function sh:orbitPlanet()
     self.x = uni.ent[self.orbit].x + (self.rad * math.cos(self.heading))
     self.y = uni.ent[self.orbit].y + (self.rad * math.sin(self.heading))
-    self.heading = self.heading + (((10000 - self.rad) / 1000000000) * uni.gameSpeed)
+    self.heading = self.heading + (((10000 - self.rad) / 100000000) * uni.gameSpeed)
 end
 
 function sh:moveToOrbit(id)
