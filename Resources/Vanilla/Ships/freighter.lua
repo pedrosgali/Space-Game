@@ -13,7 +13,7 @@ Freighter.apMax = 15
 Freighter.sp = 0
 Freighter.spMax = 0
 Freighter.shRecharge = 0
-Freighter.spd = 100
+Freighter.spd = 400
 Freighter.turn = 1
 Freighter.stored = 0
 Freighter.cargoMax = 1500
@@ -35,10 +35,12 @@ function Freighter:spawnShip(newShip, name, faction, planet)
     newShip.x = x + (self.tw / 2)
     newShip.y = y + (self.th / 2)
     newShip.isVisible = true
-    newShip:addEqSlot("Weapon")
+    newShip:addEqSlot("Small Weapon")
     newShip:addEqSlot("Armour")
     newShip:addEqSlot("Engine")
-    newShip:addEqSlot("Aux")
+    newShip:addEqSlot("Shield")
+    newShip:addEqSlot("Shield")
+    newShip:addEqSlot("AI")
     newShip:addEqSlot("Aux")
     return newShip
 end

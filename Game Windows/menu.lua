@@ -4,7 +4,7 @@ local selection = require "/Game Windows/game_select"
 local gameMenu = {}
 
 function gameMenu:newMenu(id)
-	local menu = win:newPane(menu, 140, 132)
+	local menu = win:newPane(menu, 128, 128)
 	menu.priority = 10
 	menu.isMoveable = true
 	menu.id = id

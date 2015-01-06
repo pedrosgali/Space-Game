@@ -35,6 +35,8 @@ function screen:clear()
 	self.buTab = nil
 	self.canvas = nil
 	self.camScreen = nil
+  if self.width % 8 ~= 0 then self.width = self.width - (self.width % 8) end
+  if self.height % 8 ~= 0 then self.height = self.height - (self.height % 8) end
 	self.canvas = love.graphics.newCanvas(self.width, self.height)
 end
 

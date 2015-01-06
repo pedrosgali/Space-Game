@@ -21,6 +21,16 @@ function star:addStation(id)
     self.stTab[count] = id
 end
 
+function star:addPlanet(id)
+    local count = 1
+    if self.plTab == nil then
+        self.plTab = {}
+    else
+        count = #self.plTab + 1
+    end
+    self.plTab[count] = id
+end
+
 function star:findAppropriatePlanet(rad)
     if rad <= 5000 then
         return uni.planetClassLookup("Desert")
@@ -42,8 +52,7 @@ function star:findAppropriatePlanet(rad)
 end
 
 function star:generateSystem()
-    self.plTab = {}
-    local rad = math.random(uni.planetMinRad, uni.planetMaxRad)
+  local rad = math.random(uni.planetMinRad, uni.planetMaxRad)
 	for i = 1, self.maxPlanets do
 		local angle = math.random(0, 359)
     local x, y = self.x + (rad * math.cos(angle)), (self.y + (rad * math.sin(angle)) / 2)
@@ -52,17 +61,17 @@ function star:generateSystem()
     local rName = names.randomName()
     uni.spawnPlanet(rName, class, rad, self.id, uni.player, x, y)
     rad = rad + math.random(uni.planetMinRad, uni.planetMaxRad)
-    self.plTab[i] = uni.eCnt
+    self:addPlanet(uni.eCnt)
 	end
-    local lifeChance = math.random(1, uni.lifeChance)
-    if lifeChance == uni.lifeChance then
-      local fRace = math.random(1, #uni.factionList)
-      local hpBuff = math.random(1, 10)
-      local apBuff = math.random(1, 10)
-      local spBuff = math.random(1, 10)
-      local name = names.randomName()
-      uni.spawnFaction(name, fRace, self.plTab[1], hpBuff, apBuff, spBuff)
-    end
+  local lifeChance = math.random(1, uni.lifeChance)
+  if lifeChance == uni.lifeChance then
+    local fRace = math.random(1, #uni.factionList)
+    local hpBuff = math.random(1, 10)
+    local apBuff = math.random(1, 10)
+    local spBuff = math.random(1, 10)
+    local name = names.randomName()
+    uni.spawnFaction(name, fRace, self.plTab[1], hpBuff, apBuff, spBuff)
+  end
 	for i = 1, self.maxAsteroids do
 		
 	end
@@ -78,41 +87,41 @@ end
 
 function star:info(id)
 	local info = win:newPane(info, 220, 340)
-    info.shipId = self.id
-    info.id = id
-    info.name = uni.ent[info.shipId].name
-    info.scrollPoint = 1
-    info.priority = 9
+  info.shipId = self.id
+  info.id = id
+  info.name = uni.ent[info.shipId].name
+  info.scrollPoint = 1
+  info.priority = 9
 	info.navScreen = true
 	info.cargoScreen = false
-    info:move(uni.xOff, uni.yOff)
-	
-    function info:statBars(x, y)
-        self:box(x, y, self.width - (x * 2), 60, 0x00, 0x00, 0x00, uni.opacity)
-        self:percentageBar(x + 2, y + 5, self.width - ((x * 2) + 4), 16, uni.ent[self.shipId].hp, uni.ent[self.shipId].hpMax)
-        self:percentageBar(x + 2, y + 22, self.width - ((x * 2) + 4), 16, uni.ent[self.shipId].ap, uni.ent[self.shipId].apMax, 0x99, 0x99, 0x99, uni.opacity, 0x66, 0x66, 0x66, uni.opacity)
-        self:percentageBar(x + 2, y + 39, self.width - ((x * 2) + 4), 16, uni.ent[self.shipId].sp, uni.ent[self.shipId].spMax, 0xFF, 0xFF, 0x00, uni.opacity, 0xFF, 0x00, 0x00, uni.opacity)
-    end
+  info:move(uni.xOff, uni.yOff)
 
-    function info:econView(x, y, w, h)
-        local boxRows = #uni.items --math.floor(h / 17)
-        if self.scrollPoint > boxRows then
-            if self.scrollPoint > #uni.items - boxRows then
-                self.scrollPoint = #uni.items - boxRows
-            end
-        end
-        local yOff = 0
-        local prTab = uni.gatherStarProduction(self.shipId)
-        local reTab = uni.gatherStarReagents(self.shipId)
-        for i = self.scrollPoint, self.scrollPoint + boxRows - 1 do
-            local amt = math.floor(uni.items[i].cost * uni.ent[self.shipId].econ[i])
-            self:button(uni.items[i].name, "none", x, y + yOff, w / 2, 16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x00, uni.opacity)
-            self:button(amt, "none", x + (w / 2), y + yOff, (w / 2) / 3, 16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x00, uni.opacity)
-            self:button(prTab[i].amt, "none", x + (w / 2) + ((w / 2) / 3), y + yOff, (w / 2) / 3, 16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x00, uni.opacity)
-            self:button(reTab[i].amt, "none", x + (w / 2) + 2 * ((w / 2) / 3), y + yOff, (w / 2) / 3, 16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x00, uni.opacity)
-            yOff = yOff + 17
-        end
-    end
+  function info:statBars(x, y)
+      self:box(x, y, self.width - (x * 2), 60, 0x00, 0x00, 0x00, uni.opacity)
+      self:percentageBar(x + 2, y + 5, self.width - ((x * 2) + 4), 16, uni.ent[self.shipId].hp, uni.ent[self.shipId].hpMax)
+      self:percentageBar(x + 2, y + 22, self.width - ((x * 2) + 4), 16, uni.ent[self.shipId].ap, uni.ent[self.shipId].apMax, 0x99, 0x99, 0x99, uni.opacity, 0x66, 0x66, 0x66, uni.opacity)
+      self:percentageBar(x + 2, y + 39, self.width - ((x * 2) + 4), 16, uni.ent[self.shipId].sp, uni.ent[self.shipId].spMax, 0xFF, 0xFF, 0x00, uni.opacity, 0xFF, 0x00, 0x00, uni.opacity)
+  end
+
+  function info:econView(x, y, w, h)
+      local boxRows = #uni.items --math.floor(h / 17)
+      if self.scrollPoint > boxRows then
+          if self.scrollPoint > #uni.items - boxRows then
+              self.scrollPoint = #uni.items - boxRows
+          end
+      end
+      local yOff = 0
+      local prTab = uni.gatherStarProduction(self.shipId)
+      local reTab = uni.gatherStarReagents(self.shipId)
+      for i = self.scrollPoint, self.scrollPoint + boxRows - 1 do
+          local amt = math.floor(uni.items[i].cost * uni.ent[self.shipId].econ[i])
+          self:button(uni.items[i].name, "none", x, y + yOff, w / 2, 16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x00, uni.opacity)
+          self:button(amt, "none", x + (w / 2), y + yOff, (w / 2) / 3, 16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x00, uni.opacity)
+          self:button(prTab[i].amt, "none", x + (w / 2) + ((w / 2) / 3), y + yOff, (w / 2) / 3, 16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x00, uni.opacity)
+          self:button(reTab[i].amt, "none", x + (w / 2) + 2 * ((w / 2) / 3), y + yOff, (w / 2) / 3, 16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x00, uni.opacity)
+          yOff = yOff + 17
+      end
+  end
 
 	function info:renderSetup()
 		self:clear()

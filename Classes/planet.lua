@@ -79,9 +79,11 @@ function planet:addStation(id)
 end
 
 function planet:update(dt)
-	self.heading = self.heading + (((50000 - self.rad) / 1000000000) * uni.gameSpeed)
-  self.cloudAng = self.cloudAng - ((self.spin + self.wind) * dt) * uni.gameSpeed
-  self.landAng = self.landAng + (self.spin * dt) * uni.gameSpeed
+  dt = dt * uni.gameSpeed
+  local maxOrbit = uni.planetMaxRad * #uni.ent[self.homeStarId].plTab
+	self.heading = self.heading + (((maxOrbit - self.rad) / uni.planetSpeed) * dt)
+  self.cloudAng = self.cloudAng - ((self.spin + self.wind) * dt)
+  self.landAng = self.landAng + (self.spin * dt)
   local dx = uni.ent[self.homeStarId].x - self.x
   local dy = uni.ent[self.homeStarId].y - self.y
   local bearing = math.deg(math.atan2(dy,dx))

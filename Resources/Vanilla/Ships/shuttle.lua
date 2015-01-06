@@ -13,7 +13,7 @@ shuttle.apMax = 5
 shuttle.sp = 0
 shuttle.spMax = 0
 shuttle.shRecharge = 0
-shuttle.spd = 150
+shuttle.spd = 600
 shuttle.turn = 3
 shuttle.stored = 0
 shuttle.cargoMax = 500
@@ -35,10 +35,11 @@ function shuttle:spawnShip(newShip, name, faction, home)
   newShip.x = x + (self.tw / 2)
   newShip.y = y + (self.th / 2)
 	newShip.isVisible = true
-  newShip:addEqSlot("Weapon")
+  newShip:addEqSlot("Small Weapon")
   newShip:addEqSlot("Armour")
   newShip:addEqSlot("Engine")
-  newShip:addEqSlot("Aux")
+  newShip:addEqSlot("Shield")
+  newShip:addEqSlot("AI")
 	return newShip
 end
 

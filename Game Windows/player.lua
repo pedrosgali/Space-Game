@@ -4,7 +4,7 @@ local maths = require "/Lib/maths"
 local pData = {}
 
 function pData:newSheet(id)
-	local menu = win:newPane(menu, 800, 605)
+	local menu = win:newPane(menu, 1024, 512)
 	menu.priority = 9
 	menu.isMoveable = true
 	menu.isVisible = false

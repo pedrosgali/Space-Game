@@ -4,10 +4,10 @@ local maths = require "/Lib/maths"
 local mData = {}
 
 function mData:newMap(id)
-  local map = win:newPane(map, 500, 522)
+  local map = win:newPane(map, 512, 512)
   map.priority = 9
 	map.isMoveable = true
-	map.isVisible = true
+	map.isVisible = false
 	map.id = id
   map.zoom = .0000041
   map.x = 0
@@ -73,18 +73,22 @@ function mData:newMap(id)
   end
   
   function map:render()
-	if self.isVisible then
-		self:renderSetup()
-		self:renderBoxes()
-		self:renderButtons()
-		self:renderButtonTables()
-		self:renderText()
-		self:renderLines()
-    self:renderCamera()
-    self:renderDropdowns()
-    self:drawStars()
-	end
-end
+    if self.isVisible then
+      self:renderSetup()
+      self:renderBoxes()
+      self:renderButtons()
+      self:renderButtonTables()
+      self:renderText()
+      self:renderLines()
+      self:renderCamera()
+      self:renderDropdowns()
+      self:drawStars()
+    end
+  end
+  
+  function map:updateCall()
+    self:render()
+  end
   
   function map:mapClickCheck(x, y)
     x = x - self.x
@@ -105,31 +109,45 @@ end
     end
   end
   
-  function map:mousePressed(x, y)
-	if self:isClicked(x, y) then
-		local ret = self:dropdownClicked(x, y)
-		if ret ~= false then
-			if ret == "close" then
-				self.isVisible = false
-			--elseif ret == "your button return value" then
-			end
-			return true
-		end
-		ret = self:buttonClicked(x, y)
-		if ret ~= false then
-			if ret == "close" then
-				self.isVisible = false
-			--elseif ret == "your button return value" then
-			end
-			return true
-		end
-    if self:mapClickCheck(x, y) then return true end
-		self.grabbed = true
-		self.grabPointX = x - self.x
-		self.grabPointY = y - self.y
-		return true
-	end
-end
+  function map:mousePressed(x, y, btn)
+    if self:isClicked(x, y) then
+      if btn == "l" then
+        local ret = self:dropdownClicked(x, y)
+        if ret ~= false then
+          if ret == "close" then
+            self.isVisible = false
+          --elseif ret == "your button return value" then
+          end
+          return true
+        end
+        ret = self:buttonClicked(x, y)
+        if ret ~= false then
+          if ret == "close" then
+            self.isVisible = false
+          --elseif ret == "your button return value" then
+          end
+          return true
+        end
+        if self:mapClickCheck(x, y) then return true end
+        self.grabbed = true
+        self.grabPointX = x - self.x
+        self.grabPointY = y - self.y
+        return true
+      elseif btn == "wu" then
+        if self.zoom < .0000201 then
+          self.zoom = self.zoom + .0000001
+        end
+      elseif btn == "wd" then
+        if self.zoom > .0000201 then
+          self.zoom = self.zoom - .0000001
+        end
+      end
+      if self.zoom < .0000041 then
+        self.zoom = .0000041
+      end
+      return true
+    end
+  end
   map:render()
   return map
 end

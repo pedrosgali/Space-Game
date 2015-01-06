@@ -15,6 +15,10 @@ function eq:onRemove()
   
 end
 
+function eq:onFire()
+  
+end
+
 function eq:onMove()
   
 end

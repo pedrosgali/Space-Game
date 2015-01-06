@@ -19,7 +19,8 @@ function fac:newFaction(newFac, id, name, homePlanetId, hp, ap, sp)
 	newFac.apBuff = ap
 	newFac.shBuff = sp
 	local ranAI = math.random(1, #uni.aiList)
-	newFac.ai = uni.aiList[ranAI]:newAi(newFac.ai, id)
+	newFac.ai = uni.aiList[ranAI]:newAi(id, newFac.name)
+  newFac.ai:init()
 	return newFac
 end
 

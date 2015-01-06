@@ -10,8 +10,6 @@ ai.slot = "AI"
 ai.type = "station"
 ai.shipBuyPoint = 10000000
 ai.maxShips = 2
-ai.timer = 0
-ai.tick = 30
 
 function ai:equipItem()
 	local stAi = {}
@@ -129,6 +127,7 @@ function ai:buyWares(star, id)
 				self.shipTab[id].state = "Inbound"
 				self.shipTab[id].target = self.id
 				uni.ent[shipId]:dockAtTarget(self.id)
+        uni.ent[docked].cash = uni.ent[docked].cash + totCost
 				uni.ent[self.id].cash = uni.ent[self.id].cash - totCost
 			else
 				self:logEntry("Goods too expensive.")

@@ -4,8 +4,8 @@ local item = require "/Classes/item"
 
 local fact = {}
 
-function fact:newFaction(newFac)
-	local newFac = newFac or {}
+function fact:newFaction()
+	local newFac = {}
 	setmetatable(newFac, self)
 	self.__index = self
 	return newFac
@@ -110,18 +110,21 @@ end
 
 function fact:spawnShip(class, group)
 	uni.spawnShip(self.name.." "..class, class, self.name, self.homePlanetId)
-  uni.equipItem(uni.eCnt, "Small shield generator")
-  uni.equipItem(uni.eCnt, "Small Jumpdrive")
 	if group == "trade" then
 		self:addTradeUnit(uni.eCnt)
 	else
-
+    uni.equipItem(uni.eCnt, "Small shield generator")
+    uni.equipItem(uni.eCnt, "Small Jumpdrive")
+    uni.equipItem(uni.eCnt, "Small Laser Cannon")
+    --uni.equipItem(uni.eCnt, "Basic Combat AI")
+    uni.ent[uni.eCnt].aggressive = true
 	end
 end
 
 function fact:spawnGroup(class, group)
 	for i = 1, math.random(uni.maxStartShips / 2, uni.maxStartShips) do
 		self:spawnShip(class, group)
+    uni.ent[uni.eCnt]:setOrbit(self.homePlanetId)
 		if group == "trade" then
 			self:addTradeUnit(uni.eCnt)
 		else
@@ -136,18 +139,18 @@ function fact:init()
 	if uni.ent[hSys].plTab == nil then
 		hSys = hSys + 1
 	end
-  self:addStar(hSys)
+  --self:addStar(hSys)
 	for i = 1, #uni.ent[hSys].plTab do
 		local plId = uni.ent[hSys].plTab[i]
 		if self.atmo == uni.ent[plId].atmo then
 			self.homePlanetId = plId
-			self:addPlanet(plId)
+			--self:addPlanet(plId)
 			break
 		elseif i == #uni.ent[hSys].plTab then
 			uni.ent[plId].atmo = self.atmo
 			self.homePlanetId = plId
 			self.homePlanetType = uni.ent[plId].class
-			self:addPlanet(plId)
+			--self:addPlanet(plId)
 		end
 	end
 	for i = 1, #uni.items do
@@ -174,7 +177,7 @@ function fact:init()
 			self:addStation(uni.eCnt)
 		end
 	end
-	self:spawnGroup("Shuttle", "trade")
+	self:spawnGroup("Shuttle", "war")
 	--self:spawnGroup("Freighter", "trade")
 end
 

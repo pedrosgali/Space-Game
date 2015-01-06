@@ -3,7 +3,7 @@ local names = require "/Lib/namegen"
 
 local equip = eq:newEquipment(equip)
 equip.name = "Small shield generator"
-equip.slot = "Aux"
+equip.slot = "Shield"
 equip.type = "ship"
 
 function equip:equipItem()
@@ -12,7 +12,7 @@ function equip:equipItem()
     self.__index = self
     item.sp = 0
     item.spMax = 100
-    item.shRecharge = .5
+    item.spRecharge = .5
     return item
 end
 
@@ -31,8 +31,7 @@ end
 function equip:onUpdate(dt)
   dt = dt * uni.gameSpeed
   if uni.ent[self.id].sp < uni.ent[self.id].spMax then
-    uni.ent[self.id].sp = math.min(uni.ent[self.id].sp + (self.shRecharge * dt), self.spMax)
-    uni.ent[self.id]:logEntry("Shields charging..."..uni.ent[self.id].sp)
+    uni.ent[self.id].sp = math.min(uni.ent[self.id].sp + (self.spRecharge * dt), self.spMax)
   end
 end
 

@@ -154,7 +154,7 @@ function sh:move(dt)
 			end
 		end
   elseif self.orbitFound then
-      self:orbitPlanet()
+      self:orbitPlanet(dt)
   elseif self.orbit ~= 0 then
       self:moveToOrbit(self.orbit)
 	end
@@ -180,10 +180,11 @@ function sh:setOrbit(id)
     self:logEntry("Moving to orbit "..uni.ent[id].name)
 end
 
-function sh:orbitPlanet()
-    self.x = uni.ent[self.orbit].x + (self.rad * math.cos(self.heading))
-    self.y = uni.ent[self.orbit].y + (self.rad * math.sin(self.heading))
-    self.heading = self.heading + (((10000 - self.rad) / 100000000) * uni.gameSpeed)
+function sh:orbitPlanet(dt)
+  dt = dt * uni.gameSpeed
+  self.heading = self.heading + ((self.rad / 500000) * dt)
+  self.x = uni.ent[self.orbit].x + (self.rad * math.cos(self.heading))
+	self.y = uni.ent[self.orbit].y + (self.rad * math.sin(self.heading))
 end
 
 function sh:moveToOrbit(id)
@@ -328,6 +329,66 @@ function sh:addEqSlot(slot)
     end
     self.eqTab[count] = {}
     self.eqTab[count].slot = slot
+end
+
+--COMBAT FUNCTIONS--
+
+function sh:damageShields(amt, crit)
+  if crit == "Shields" then amt = amt * 2 end
+  for i = 1, #self.eqTab do
+    if self.eqTab[i].equipped ~= nil then
+      if self.eqTab[i].slot == "Shield" then
+        if self.eqTab[i].sp >= amt then
+          self.eqTab[i].sp = self.eqTab[i].sp - amt
+          return 0
+        else
+          amt = amt - self.eqTab[i].sp
+          self.eqTab[i].sp = 0
+        end
+      end
+    end
+  end
+  if crit == "Shields" then amt = math.floor(amt / 2) end
+  return amt
+end
+
+function sh:damageArmour(amt, crit)
+  if crit == "Armour" then amt = amt * 2 end
+  for i = 1, #self.eqTab do
+    if self.eqTab[i].equipped ~= nil then
+      if self.eqTab[i].slot == "Armour" then
+        if self.eqTab[i].ap >= amt then
+          self.eqTab[i].ap = self.eqTab[i].ap - amt
+          return 0
+        else
+          amt = amt - self.eqTab[i].ap
+          self.eqTab[i].ap = 0
+        end
+      end
+    end
+  end
+  if crit == "Armour" then amt = amt / 2 end
+  return amt
+end
+
+function sh:damageHull(amt, crit)
+  if crit == "Hull" then amt = amt * 2 end
+  self.hp = self.hp - amt
+  return amt
+end
+
+function sh:takeDamage(amt, crit)
+  amt = self:damageShields(amt, crit)
+  amt = self:damageArmour(amt, crit)
+  amt = self:damageHull(amt, crit)
+  if amt > 0 then
+    self.dead = true
+    return true
+  end
+end
+
+function sh:onCombat(dt)
+  
 end
 
 --UPDATE CALLS--

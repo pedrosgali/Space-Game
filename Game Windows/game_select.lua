@@ -3,22 +3,22 @@ local win = require "/Lib/screen"
 local gameMenu = {}
 
 function gameMenu:newMenu(id)
-    local sx, sy = love.window.getDesktopDimensions()
-	local menu = win:newPane(menu, sx, sy)
+  local sx, sy = love.window.getDesktopDimensions()
+	local menu = win:newPane(menu, 1024, 512)
 	menu.priority = 9
 	menu.isMoveable = false
 	menu.id = id
-    menu.gameMode = 1
-	menu:move(1, 1)
+  menu.gameMode = 1
+	menu:center()
     
     function menu:updateCall()
-        self: render()
+        self:render()
     end
     
     function menu:renderSetup()
         self:clear()
         menu:backdrop(0x99, 0x99, 0x99, 0xFF)
-        local sx, sy = love.window.getDesktopDimensions()
+        local sx, sy = self.width, self.height
         local bWidth = math.floor((sx - 20) / 4)
         local xOff = 6
         local yOff = 6
@@ -53,6 +53,7 @@ function gameMenu:newMenu(id)
 				elseif ret == "new" then
                     uni.gameMode = self.gameMode
 					gameUtils.newGame(self.gameMode)
+          self.isVisible = false
 				elseif string.sub(ret, 1, 3) == "sc_" then
                     local i = tonumber(string.sub(ret, 4, #ret))
 					self.gameMode = i

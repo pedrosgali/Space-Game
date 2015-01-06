@@ -10,10 +10,10 @@ local names = require "/Lib/namegen"
 local sp = {}
 
 -- Variables
-sp.armWidth = 3    -- Number of iterations over each arm
-sp.stars = 300      -- Number of stars per arm
+sp.armWidth = 3     -- Number of iterations over each arm
+sp.stars = 300      -- Arm length
 sp.spacing = 400    -- Space between stars
-sp.density = 10      -- Density of stars, higher number is less dense
+sp.density = 3      -- Density of stars, higher number is less dense
 sp.uniSpin = 0.02   -- Angle of each arm's curve, really sensitive, default is 0.02
 
 --Generation Code

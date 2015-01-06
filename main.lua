@@ -8,7 +8,7 @@ local ec = require "/Game Windows/economy"
 
 --SWITCHES--
 
-dbgBool = false
+dbgBool = true
 
 --VARIABLES--
 
@@ -32,6 +32,7 @@ uni.lifeChance = 20
 uni.starClumping = 6000
 uni.planetMinRad = 5000
 uni.planetMaxRad = 25000
+uni.planetSpeed = 1000000000
 uni.minMoonRad = 500
 uni.moonSpacing = 250
 uni.atmoChance = 20
@@ -43,7 +44,7 @@ uni.stationTick = 10
 uni.economyTimer = 0
 uni.economyTick = 120
 uni.factionTimer = 0
-uni.factionTick = 60
+uni.factionTick = 3
 uni.skimPerc = 1.1
 uni.maxShipLog = 100
 uni.maxAiLog = 1000
@@ -77,7 +78,7 @@ cWin = {}
 gameUtils = {}
 gameUtils.applyVelocity = true
 
---RESOURCE LOADING FUNCTIONS--
+--OBJECT POOL LOADING FUNCTIONS--
 
 function addMaps(path)
 	local list = love.filesystem.getDirectoryItems(path)
@@ -319,7 +320,7 @@ function gameUtils.debug(message, clear)
 end
 
 function gameUtils.debugPane(id)
-	local dbg = win:newPane(dbg, 360, 700)
+	local dbg = win:newPane(dbg, 512, 512)
 	dbg:center()
 	dbg.priority = 9
   dbg.id = id
@@ -398,21 +399,6 @@ function gameUtils.entitySearch(type, fact)
 		    if uni.ent[i].type == type and uni.ent[i].faction == fact then
 				rTab[c] = i
 				c = c + 1
-			end
-		end
-	end
-	return rTab
-end
-
-function gameUtils.searchList(list, key, value)
-	local count = 1
-	local rTab = {}
-	for i = 1, #list do
-		for k, v in pairs(uni.ent[list[i]]) do
-			if k == key then
-				if value == nil or value == "all" or v == value then
-					rTab[count] = list[i]
-				end
 			end
 		end
 	end
@@ -681,12 +667,6 @@ function uni.spawnShip(name, class, faction, home)
 	end
 end
 
-function uni.newStationAi(type, id)
-	local aiId = uni.statAiLookup(type)
-	local ai = uni.statAiList[aiId]:newAi(uni.ent[id].ai, id)
-	return ai
-end
-
 function uni.spawnStation(name, class, radius, homePlanet, faction, x, y)
     uni.incrementTable()
     local id = uni.statClassLookup(class)
@@ -761,6 +741,7 @@ function uni.spawnPlanet(name, class, radius, homeStar, faction, x, y)
       local rcl = math.random(1, #uni.mTypes)
       local mClass = uni.mTypes[rcl].class
       uni.spawnMoon(namegen.randomName(), mClass, rad, myId, faction, xPos, yPos)
+      uni.ent[homeStar]:addPlanet(uni.eCnt)
       rad = (rad + math.random(uni.moonSpacing / 3, uni.moonSpacing) * uni.ent[myId].scale)
     end
   end
@@ -869,7 +850,7 @@ function uni.updateFactions()
       end
   end
 	for i = 1, #uni.factions do
-		--uni.factions[i].ai:turn()
+		uni.factions[i].ai:run()
 	end
 end
 
@@ -959,7 +940,7 @@ function love.mousepressed(x, y, button)
   end
   if button == "wu" then
     if uni.scale < 2 then
-      uni.scale = uni.scale + 0.001
+      uni.scale = uni.scale + 0.01
     end
     uni.selx1 = "none"
     uni.selx2 = "none"
@@ -1073,30 +1054,64 @@ function checkMouseScroll(dt)
 	end
 end
 
+function drawCheck()
+  local rTab = {}
+  local count = 1
+  local wid, hig = love.window.getDesktopDimensions()
+  local hWid = wid / 2 * (1 / uni.scale)
+	local hHig = hig / 2 * (1 / uni.scale)
+  for i = 1, #uni.ent do
+    local x, y = uni.ent[i].x, uni.ent[i].y
+    local pxOf = maths.round(hWid + (x - uni.x), 0)
+    local pyOf = maths.round(hHig + (y - uni.y), 0)
+    if x >= uni.x - hWid and x <= uni.x + hWid then
+      if y >= uni.y - hHig and y <= uni.y + hHig then
+        rTab[count] = i
+        count = count + 1
+      end
+    end
+  end
+  return rTab
+end
+
+function uni.tradeTurn(dt)
+  uni.stationTimer = uni.stationTimer + (dt * uni.gameSpeed)
+  uni.economyTimer = uni.economyTimer + (dt * uni.gameSpeed)  
+  if uni.stationTimer > uni.stationTick then
+    uni.stationTimer = 0
+    uni.updateStations()
+  end
+  if uni.economyTimer > uni.economyTick then
+    uni.economyTimer = 0
+    uni.updateEconomy()
+  end
+end
+
+function uni.factionTurn(dt)
+  uni.factionTimer = uni.factionTimer + (dt * uni.gameSpeed)
+  if uni.factionTimer > uni.factionTick then
+    uni.factionTimer = 0
+    uni.updateFactions()
+  end
+end
+
+function uni.combatTurn(dt)
+  for i = 1, #uni.ent do
+    
+  end
+end
+
 function love.update(dt)
-  uni.countEntities()
+  --uni.countEntities()
 	if dbgBool then
 		cWin[2]:render()
 	end
 	if not uni.isPaused then
 		if uni ~= nil then
 			if uni.ent ~= nil then
-				uni.stationTimer = uni.stationTimer + (dt * uni.gameSpeed)
-				uni.economyTimer = uni.economyTimer + (dt * uni.gameSpeed)
-				uni.factionTimer = uni.factionTimer + (dt * uni.gameSpeed)
-				if uni.stationTimer > uni.stationTick then
-					uni.stationTimer = 0
-					uni.updateStations()
-				end
-				if uni.economyTimer > uni.economyTick then
-					uni.economyTimer = 0
-					uni.updateEconomy()
-				end
-				if uni.factionTimer > uni.factionTick then
-					uni.factionTimer = 0
-					uni.updateFactions()
-				end
-	            uni.scenarios[uni.gameMode]:update()
+        uni.tradeTurn(dt)
+				uni.factionTurn(dt)
+        uni.scenarios[uni.gameMode]:update()
 				if uni.selected ~= 0 then
 					uni.setCamera(uni.ent[uni.selected].x, uni.ent[uni.selected].y)
 				end
@@ -1104,6 +1119,7 @@ function love.update(dt)
           uni.ent[i]:update(dt)
 					uni.ent[i]:move(dt)
 				end
+        uni.renderList = drawCheck()
 				if uni.selx1 ~= "none" then
 					uni.selx2, uni.sely2 = uni.getMapCoordinates(love.mouse.getPosition())
 				end
@@ -1116,38 +1132,20 @@ function love.update(dt)
 	checkMouseScroll(dt)
 end
 
-
 --RENDERING--
-
-function drawStars()
-	love.graphics.push()
-	love.graphics.scale(.001, .001)
-	if uni ~= nil then
-		if uni.ent ~= nil then
-			for i = 1, #uni.starList do
-				local pxOf, pyOf = uni.getScreenCoordinates(uni.ent[uni.starList[i]].x, uni.ent[uni.starList[i]].y)
-				local angle = math.rad(uni.ent[uni.starList[i]].vizHeading)
-				local w = uni.ent[uni.starList[i]].tw * 2
-				love.graphics.setColor(0x99, 0x99, 0x99, 0x99)
-				love.graphics.circle("fill", pxOf, pyOf, w)
-			end
-		end
-	end
-	love.graphics.setColor(0xFF, 0xFF, 0xFF, 0xFF)
-	love.graphics.pop()
-end
 
 function drawMap()
 	if uni ~= nil then
 		if uni.ent ~= nil then
-			for i = 1, #uni.ent do
-				local wid, hig = love.window.getDesktopDimensions()
-				local hWid = wid / 2 * (1 / uni.scale)
-				local hHig = hig / 2 * (1 / uni.scale)
-				local xMin = math.floor(uni.x - hWid)
-				local xMax = math.floor(uni.x + hWid)
-				local yMin = math.floor(uni.y - hHig)
-				local yMax = math.floor(uni.y + hHig)
+      local wid, hig = love.window.getDesktopDimensions()
+      local hWid = wid / 2 * (1 / uni.scale)
+      local hHig = hig / 2 * (1 / uni.scale)
+      local xMin = math.floor(uni.x - hWid)
+      local xMax = math.floor(uni.x + hWid)
+      local yMin = math.floor(uni.y - hHig)
+      local yMax = math.floor(uni.y + hHig)
+			for n = 1, #uni.renderList do
+        local i = uni.renderList[n]
 				local offx = uni.ent[i].tw / 2
 				local offy = uni.ent[i].th / 2
 				local pxOf, pyOf = uni.getScreenCoordinates(uni.ent[i].x, uni.ent[i].y)
@@ -1271,7 +1269,6 @@ function drawMap()
 end
 
 function love.draw()
-	drawStars()
 	love.graphics.push()
 	love.graphics.scale(uni.scale, uni.scale)
 	drawMap()
