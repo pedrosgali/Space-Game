@@ -29,6 +29,7 @@ function planet:spawnPlanet(newStar)
   newPlanet.cloudImage = love.graphics.newQuad(611, 1, newPlanet.tw, newPlanet.th, uni.planSet:getDimensions())
   newPlanet.shadeImage = love.graphics.newQuad(916, 1, newPlanet.tw, newPlanet.th, uni.planSet:getDimensions())
   newPlanet.scale = math.random(100, 250) / 100
+  newPlanet:addResources()
   return newPlanet
 end
 
@@ -54,6 +55,18 @@ function planet:setAtmoColour(atmo)
         self.ag = math.random(127, 255)
         self.ab = math.random(127, 255)
     end
+end
+
+function planet:addResources()
+  local count = 1
+  self.cargo = {}
+  for i = 1, #uni.items do
+    if uni.items[i].type == "Ore" then
+      self.cargo[count] = {}
+      self.cargo[count].id = i
+      self.cargo[count].amt = math.floor(math.random(uni.maxPlanetResource / 2, uni.maxPlanetResource) * self.scale)
+    end
+  end
 end
 
 function planet:randomizeColour()

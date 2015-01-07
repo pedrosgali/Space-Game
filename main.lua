@@ -33,6 +33,7 @@ uni.starClumping = 6000
 uni.planetMinRad = 5000
 uni.planetMaxRad = 25000
 uni.planetSpeed = 1000000000
+uni.maxPlanetResource = 10000000
 uni.minMoonRad = 500
 uni.moonSpacing = 250
 uni.atmoChance = 20

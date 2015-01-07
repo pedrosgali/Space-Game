@@ -21,6 +21,7 @@ function moon:spawnMoon()
   newMoon.cloudImage = love.graphics.newQuad(611, 1, newMoon.tw, newMoon.th, uni.planSet:getDimensions())
   newMoon.shadeImage = love.graphics.newQuad(916, 1, newMoon.tw, newMoon.th, uni.planSet:getDimensions())
   newMoon.scale = math.random(25, 33) / 100
+  newMoon:addResources()
   return newMoon
 end
 
@@ -54,6 +55,18 @@ function moon:setAtmoColour(atmo)
     self.ar = 255
     self.ag = 255
     self.ab = 255
+  end
+end
+
+function moon:addResources()
+  local count = 1
+  self.cargo = {}
+  for i = 1, #uni.items do
+    if uni.items[i].type == "Ore" then
+      self.cargo[count] = {}
+      self.cargo[count].id = i
+      self.cargo[count].amt = math.floor(math.random(uni.maxPlanetResource / 2, uni.maxPlanetResource) * self.scale)
+    end
   end
 end
 
