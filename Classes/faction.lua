@@ -136,49 +136,45 @@ end
 function fact:init()
   uni.player = self.name
 	local hSys = self.homeStarId
-	if uni.ent[hSys].plTab == nil then
-		hSys = hSys + 1
-	end
-  --self:addStar(hSys)
-	for i = 1, #uni.ent[hSys].plTab do
-		local plId = uni.ent[hSys].plTab[i]
-		if self.atmo == uni.ent[plId].atmo then
-			self.homePlanetId = plId
-			--self:addPlanet(plId)
-			break
-		elseif i == #uni.ent[hSys].plTab then
-			uni.ent[plId].atmo = self.atmo
-			self.homePlanetId = plId
-			self.homePlanetType = uni.ent[plId].class
-			--self:addPlanet(plId)
-		end
-	end
-	for i = 1, #uni.items do
-		local amt = math.random(math.floor(uni.items[i].rarity / 2), uni.items[i].rarity)
-		local itemType = uni.items[i].type
-		local stClass = "none"
-		for k = 1, #uni.sTypes do
-			if uni.sTypes[k]:canMake(itemType) then
-				stClass = uni.sTypes[k].class
-			end
-		end
-		for j = 1, amt do
-			local rPl = math.random(1, #uni.ent[hSys].plTab)
-			local plId = uni.ent[hSys].plTab[rPl]
-			local stName = uni.items[i].name.." "..stClass
-			local rad = math.random(uni.statMinRad, uni.statMaxRad) * (1 / uni.ent[plId].scale)
-			local angle = math.random(0, 359)
-			local px = uni.ent[plId].x
-			local py = uni.ent[plId].y
-			local x, y = px + (rad * math.cos(angle)), (py + (rad * math.sin(angle)) / 2)
-			uni.spawnStation(stName, stClass, rad, plId, self.name, x, y)
-			uni.ent[uni.eCnt]:inputTradeGood(i)
-			uni.ent[uni.eCnt]:addComponentGoods(1)
-			self:addStation(uni.eCnt)
-		end
-	end
-	self:spawnGroup("Shuttle", "war")
-	--self:spawnGroup("Freighter", "trade")
+	if uni.ent[self.homeStarId].plTab ~= nil then
+    for i = 1, #uni.ent[hSys].plTab do
+      local plId = uni.ent[hSys].plTab[i]
+      if self.atmo == uni.ent[plId].atmo then
+        self.homePlanetId = plId
+        break
+      elseif i == #uni.ent[hSys].plTab then
+        uni.ent[plId].atmo = self.atmo
+        self.homePlanetId = plId
+        self.homePlanetType = uni.ent[plId].class
+      end
+    end
+    for i = 1, #uni.items do
+      local amt = math.random(math.floor(uni.items[i].rarity / 2), uni.items[i].rarity)
+      local itemType = uni.items[i].type
+      local stClass = "none"
+      for k = 1, #uni.sTypes do
+        if uni.sTypes[k]:canMake(itemType) then
+          stClass = uni.sTypes[k].class
+        end
+      end
+      for j = 1, amt do
+        local rPl = math.random(1, #uni.ent[hSys].plTab)
+        local plId = uni.ent[hSys].plTab[rPl]
+        local stName = uni.items[i].name.." "..stClass
+        local rad = math.random(uni.statMinRad, uni.statMaxRad) * (1 / uni.ent[plId].scale)
+        local angle = math.random(0, 359)
+        local px = uni.ent[plId].x
+        local py = uni.ent[plId].y
+        local x, y = px + (rad * math.cos(angle)), (py + (rad * math.sin(angle)) / 2)
+        uni.spawnStation(stName, stClass, rad, plId, self.name, x, y)
+        uni.ent[uni.eCnt]:inputTradeGood(i)
+        uni.ent[uni.eCnt]:addComponentGoods(1)
+        self:addStation(uni.eCnt)
+      end
+    end
+    self:spawnGroup("Shuttle", "war")
+    --self:spawnGroup("Freighter", "trade")
+  end
 end
 
 return fact

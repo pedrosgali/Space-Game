@@ -34,6 +34,8 @@ uni.planetMinRad = 5000
 uni.planetMaxRad = 25000
 uni.planetSpeed = 1000000000
 uni.maxPlanetResource = 10000000
+uni.planetMaxPop = 10000000000
+uni.planetGrowthTick = 120
 uni.minMoonRad = 500
 uni.moonSpacing = 250
 uni.atmoChance = 20
@@ -409,11 +411,12 @@ end
 function gameUtils.newGame(id)
 	uni.factions = nil
   uni.maps[uni.mapChoice]:generate()
-	uni.scenarios[id]:init()
 	uni.starList = uni.searchList("star", "all")
 	for i = 1, #uni.factions do
 		uni.factions[i]:init()
+    uni.ent[uni.factions[i].homePlanetId]:populate()
 	end
+  uni.scenarios[id]:init()
   uni.updateEconomy()
   uni.updateStations()
 	cWin = nil
@@ -642,16 +645,15 @@ function uni.incrementTable()
     end
 end
 
-function uni.spawnFaction(name, raceId, homePlanet, hp, ap, sp)
+function uni.spawnFaction(name, raceId, homeStar, hp, ap, sp)
 	local count = 1
 	if uni.factions == nil then
 		uni.factions = {}
 	else
 		count = #uni.factions + 1
 	end
-	uni.factions[count] = uni.factionList[raceId]:newFaction(uni.factions[count], count, name, homePlanet, hp, ap, sp)
-	uni.fCount = count
-	uni.selected = homePlanet
+	uni.factions[count] = uni.factionList[raceId]:newFaction(count, name, homeStar, hp, ap, sp)
+	uni.selected = homeStar
 end
 
 function uni.spawnShip(name, class, faction, home)
@@ -751,10 +753,12 @@ end
 function uni.spawnMoon(name, class, radius, homePlanet, faction, x, y)
   uni.incrementTable()
   local id = uni.moonClassLookup(class)
+  local homeStar = uni.ent[homePlanet].homeStarId
 	uni.ent[uni.eCnt] = uni.mTypes[id]:spawnMoon(name, faction, x, y)
 	uni.ent[uni.eCnt].id = uni.eCnt
 	uni.ent[uni.eCnt].rad = radius
   uni.ent[uni.eCnt]:setHome(homePlanet)
+  uni.ent[homeStar]:addPlanet(uni.eCnt)
 end
 
 function uni.spawnStar(name, class, faction, x, y, ang)
@@ -1193,7 +1197,7 @@ function drawMap()
               love.graphics.setColor(0xFF, 0xFF, 0xFF, 0xFF)
               love.graphics.draw(uni.planSet, uni.ent[i].shadeImage, pxOf, pyOf, uni.ent[i].shadeAng, uni.ent[i].scale, uni.ent[i].scale, offx, offy)
               love.graphics.setColor(0x99, 0x99, 0x99, 0x33)
-              local hStar = uni.ent[i].home
+              local hStar = uni.ent[i].homePlanetId
               pxOf, pyOf = uni.getScreenCoordinates(uni.ent[hStar].x, uni.ent[hStar].y)
               love.graphics.circle("line", pxOf, pyOf, uni.ent[i].rad, 36)
               love.graphics.setColor(0xFF, 0xFF, 0xFF, 0xFF)

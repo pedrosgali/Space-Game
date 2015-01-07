@@ -61,7 +61,6 @@ function star:generateSystem()
     local rName = names.randomName()
     uni.spawnPlanet(rName, class, rad, self.id, uni.player, x, y)
     rad = rad + math.random(uni.planetMinRad, uni.planetMaxRad)
-    self:addPlanet(uni.eCnt)
 	end
   local lifeChance = math.random(1, uni.lifeChance)
   if lifeChance == uni.lifeChance then
@@ -70,7 +69,7 @@ function star:generateSystem()
     local apBuff = math.random(1, 10)
     local spBuff = math.random(1, 10)
     local name = names.randomName()
-    uni.spawnFaction(name, fRace, self.plTab[1], hpBuff, apBuff, spBuff)
+    uni.spawnFaction(name, fRace, self.id, hpBuff, apBuff, spBuff)
   end
 	for i = 1, self.maxAsteroids do
 		

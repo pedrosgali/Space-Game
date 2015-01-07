@@ -3,8 +3,8 @@ local maths = require "/Lib/maths"
 
 local planet = {}
 
-function planet:spawnPlanet(newStar)
-  local newPlanet = newPlanet or {}
+function planet:spawnPlanet()
+  local newPlanet = {}
   setmetatable(newPlanet, self)
   self.__index = self
   newPlanet.xVel = 0
@@ -16,6 +16,7 @@ function planet:spawnPlanet(newStar)
   newPlanet.docked = 0
   newPlanet.docking = 0
   newPlanet.state = "Idle"
+  newPlanet.isPopulated = false
   newPlanet.turn = math.random(0, 1)
   newPlanet.wind = math.random(1, 5) / 50
   newPlanet.spin = math.random(1, 10) / 50
@@ -38,23 +39,35 @@ function planet:generateAtmosphere()
 end
 
 function planet:setAtmoColour(atmo)
-    if atmo == "Oxygen" then
-        self.ar = 255
-        self.ag = 255
-        self.ab = 255
-    elseif atmo == "Hydrogen" then
-        self.ar = math.random(127, 255)
-        self.ag = 0
-        self.ab = 0
-    elseif atmo == "Helium" then
-        self.ar = math.random(127, 255)
-        self.ag = math.random(127, 255)
-        self.ab = 0
-    elseif atmo == "Boron" then
-        self.ar = 0
-        self.ag = math.random(127, 255)
-        self.ab = math.random(127, 255)
-    end
+  if atmo == "Oxygen" then
+    self.ar = 255
+    self.ag = 255
+    self.ab = 255
+  elseif atmo == "Hydrogen" then
+    self.ar = math.random(127, 255)
+    self.ag = 0
+    self.ab = 0
+  elseif atmo == "Helium" then
+    self.ar = math.random(127, 255)
+    self.ag = math.random(127, 255)
+    self.ab = 0
+  elseif atmo == "Boron" then
+    self.ar = 0
+    self.ag = math.random(127, 255)
+    self.ab = math.random(127, 255)
+  end
+end
+
+function planet:randomizeColour()
+  self.wr = math.random(0, 255)
+  self.wg = math.random(0, 255)
+  self.wb = math.random(0, 255)
+  self.lr = math.random(0, 255)
+  self.lg = math.random(0, 255)
+  self.lb = math.random(0, 255)
+  self.ar = math.random(0, 255)
+  self.ag = math.random(0, 255)
+  self.ab = math.random(0, 255)
 end
 
 function planet:addResources()
@@ -69,16 +82,14 @@ function planet:addResources()
   end
 end
 
-function planet:randomizeColour()
-    self.wr = math.random(0, 255)
-    self.wg = math.random(0, 255)
-    self.wb = math.random(0, 255)
-    self.lr = math.random(0, 255)
-    self.lg = math.random(0, 255)
-    self.lb = math.random(0, 255)
-    self.ar = math.random(0, 255)
-    self.ag = math.random(0, 255)
-    self.ab = math.random(0, 255)
+function planet:populate()
+  self.isPopulated = true
+  self.population = 100000
+  self.happiness = 100
+  self.growth = 10
+  self.growthTimer = 0
+  self.growthTick = uni.planetGrowthTick
+  self.buildings = {}
 end
 
 function planet:addStation(id)
@@ -91,6 +102,18 @@ function planet:addStation(id)
     self.stTab[count] = id
 end
 
+function planet:grow(dt)
+  if self.isPopulated then
+    self.growthTimer = self.growthTimer + dt
+    if self.growthTimer > self.growthTick then
+      if self.happiness > 75 then
+        self.population = math.min(math.floor(self.population * self.growth), math.floor(uni.planetMaxPop * self.scale))
+      end
+      self.growthTimer = 0
+    end
+  end
+end
+
 function planet:update(dt)
   dt = dt * uni.gameSpeed
   local maxOrbit = uni.planetMaxRad * #uni.ent[self.homeStarId].plTab
@@ -101,6 +124,7 @@ function planet:update(dt)
   local dy = uni.ent[self.homeStarId].y - self.y
   local bearing = math.deg(math.atan2(dy,dx))
   self.shadeAng = math.rad(bearing + 135)
+  self:grow(dt)
 end
 
 function planet:move(dt)
@@ -141,14 +165,18 @@ function planet:info(id)
             self:button("Navigation", "nav_screen", 6, 23, (self.width - 15) / 2, 16, 0x00, 0x99, 0x99, uni.opacity)
             self:button("Trade", "cargo_screen", (self.width / 2) + 5, 23, (self.width - 15) / 2, 16, 0x00, 0x66, 0x99, uni.opacity)
             self:box(6, 46, self.width - 10, self.height - 50, 0x00, 0x00, 0x00, 255)
+            local yOff = 46
+            if uni.ent[self.shipId].isPopulated then
+              self:text(uni.ent[self.shipId].population.." / "..uni.planetMaxPop * uni.ent[self.shipId].scale..".", 8, yOff, 0x00, 0x99, 0x00, uni.opacity)
+              yOff = yOff + 17
+            end
             if uni.ent[self.shipId].cargo ~= nil then
-                local yOff = 46
-                for i = 1, #uni.ent[self.shipId].cargo do
-                    local amt = uni.ent[self.shipId].cargo[i].amt
-                    local name = uni.items[uni.ent[self.shipId].cargo[i].id].name
-                    self:text(amt.." x "..name..".", 8, yOff, 0x00, 0x99, 0x00, uni.opacity)
-                    yOff = yOff + 22
-                end
+              for i = 1, #uni.ent[self.shipId].cargo do
+                  local amt = uni.ent[self.shipId].cargo[i].amt
+                  local name = uni.items[uni.ent[self.shipId].cargo[i].id].name
+                  self:text(amt.." x "..name..".", 8, yOff, 0x00, 0x99, 0x00, uni.opacity)
+                  yOff = yOff + 22
+              end
             end
         end
     end

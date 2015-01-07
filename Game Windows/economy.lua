@@ -76,7 +76,7 @@ function pData:newSheet(id)
   
   function menu:jumpToStar(faction)
     local fId = uni.factionLookup(faction)
-    local starId = uni.factions[fId].homeStarId
+    local starId = uni.factions[fId].homePlanetId
     uni.selected = starId
   end
   

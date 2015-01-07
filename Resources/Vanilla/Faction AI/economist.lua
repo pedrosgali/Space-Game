@@ -86,7 +86,7 @@ function ai.checkSystems:gatherLists()
 end
 
 function ai.checkSystems:run()
-  if uni.factions[self.id].starList == nil then
+  if uni.factions[self.id].starList == nil and uni.starList ~= nil and uni.factions[self.id].homePlanetId ~= nil then
     self:gatherLists()
     self.state = "passed"
   else

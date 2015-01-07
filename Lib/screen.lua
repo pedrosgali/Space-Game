@@ -436,6 +436,22 @@ function screen:camera(x, y, w, h, unix, uniy)
                   love.graphics.draw(uni.planSet, uni.ent[i].cloudImage, pxOf, pyOf, uni.ent[i].cloudAng, 1, 1, offx, offy)
                   love.graphics.setColor(0xFF, 0xFF, 0xFF, 0xFF)
                   love.graphics.draw(uni.planSet, uni.ent[i].shadeImage, pxOf, pyOf, uni.ent[i].shadeAng, 1, 1, offx, offy)
+                elseif uni.ent[i].type == "moon" then
+                  offx = (uni.ent[i].tw / uni.ent[i].scale) / 2
+                  offy = (uni.ent[i].th / uni.ent[i].scale) / 2
+                  love.graphics.setColor(uni.ent[i].wr, uni.ent[i].wg, uni.ent[i].wb, 0xFF)
+                  love.graphics.draw(uni.planSet, uni.ent[i].waterImage, pxOf, pyOf, angle, uni.ent[i].scale, uni.ent[i].scale, offx, offy)
+                  love.graphics.setColor(uni.ent[i].lr, uni.ent[i].lg, uni.ent[i].lb, 0xFF)
+                  love.graphics.draw(uni.planSet, uni.ent[i].landImage, pxOf, pyOf, uni.ent[i].landAng, uni.ent[i].scale, uni.ent[i].scale, offx, offy)
+                  love.graphics.setColor(uni.ent[i].ar, uni.ent[i].ag, uni.ent[i].ab, 0xFF)
+                  love.graphics.draw(uni.planSet, uni.ent[i].cloudImage, pxOf, pyOf, uni.ent[i].cloudAng, uni.ent[i].scale, uni.ent[i].scale, offx, offy)
+                  love.graphics.setColor(0xFF, 0xFF, 0xFF, 0xFF)
+                  love.graphics.draw(uni.planSet, uni.ent[i].shadeImage, pxOf, pyOf, uni.ent[i].shadeAng, uni.ent[i].scale, uni.ent[i].scale, offx, offy)
+                  love.graphics.setColor(0x99, 0x99, 0x99, 0x33)
+                  local hStar = uni.ent[i].homePlanetId
+                  pxOf, pyOf = uni.getScreenCoordinates(uni.ent[hStar].x, uni.ent[hStar].y)
+                  love.graphics.circle("line", pxOf, pyOf, uni.ent[i].rad, 36)
+                  love.graphics.setColor(0xFF, 0xFF, 0xFF, 0xFF)
                 elseif uni.ent[i].type == "star" then
                   love.graphics.setColor(0xFF, 0x99, 0x00, 255)
                   love.graphics.circle("fill", pxOf, pyOf, 500)
