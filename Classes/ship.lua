@@ -252,7 +252,6 @@ function sh:buyWares(stId, itId, amt)
         self:logEntry("Buying "..amt.." "..uni.items[itId].name..".")
         amt = self:checkHold(itId, amt)
         local bool, pId, amt = uni.ent[stId]:hasItem(itId, amt)
-        amt = uni.factions[self.facId]:canAffordX(stId, pId, amt)
         if pId ~= nil and amt > 0 then
             if bool and amt > 0 then
                 local cost = self:buyAction(stId, pId, amt)

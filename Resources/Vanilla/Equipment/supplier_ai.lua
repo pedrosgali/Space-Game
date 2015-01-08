@@ -38,8 +38,7 @@ function ai:buyShip(class)
 	local syId = uni.shipClassLookup(class)
 	uni.ent[self.id].cash = uni.ent[self.id].cash - uni.shipyard[syId].cost
 	local name = uni.ent[self.id].class.." trader "..count
-	local faction = uni.ent[self.id].faction
-	uni.spawnShip(name, class, faction, self.id)
+	uni.spawnShip(name, class, "Civilian", self.id)
 	uni.ent[uni.eCnt].selected = true --Delete this later..
 	self.shipTab[count] = {}
 	self.shipTab[count].shipId = uni.eCnt

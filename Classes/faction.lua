@@ -172,8 +172,6 @@ function fact:init()
         self:addStation(uni.eCnt)
       end
     end
-    self:spawnGroup("Shuttle", "war")
-    --self:spawnGroup("Freighter", "trade")
   end
 end
 

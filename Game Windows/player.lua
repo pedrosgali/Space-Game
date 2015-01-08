@@ -102,6 +102,7 @@ function pData:newSheet(id)
 		self:button("Armour", "none", 7 + ((self.bWidth * 6) + 5), yOff, self.bWidth + 2, 16, 0x00, 0xFF, 0x00, uni.opacity, 0x00, 0x00, 0x00, uni.opacity)
 		self:button("Shields", "none", 7 + ((self.bWidth * 7) + 8), yOff, self.bWidth + 5, 16, 0x00, 0xFF, 0x00, uni.opacity, 0x00, 0x00, 0x00, uni.opacity)
 		yOff = yOff + 17
+    self.shipTab = uni.searchList(self.ddTab[1].returnVal, self.ddTab[2].returnVal, menu.ddTab[3].returnVal)
 		local vizRows = math.floor((self.height - 26) / 17) - 2
 		for i = self.stLine, self.stLine + vizRows do
 			if self.shipTab[i] ~= nil then

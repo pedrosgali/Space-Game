@@ -131,18 +131,42 @@ function ai.getShipLists:run()
 end
 
 
+--Check Ship Count:
+--Counts all faction owned ships of a given type, passes if there are more than the given number)
+--ai.ch[etc]:add(ai.checkShipCount, nodeName, facId, amt, type)
+ai.checkShipCount = bt.inheritsFrom(bt.node, "Check Ship Count")
+function ai.checkShipCount:run()
+  local amt = self.args[1]
+  local type = self.args[2]
+  local count = 0
+  if uni.factions[self.id].shipTab[1] ~= nil then
+    for i = 1, #uni.factions[self.id].shipTab do
+      if uni.factions[self.id].shipTab[i].type == type then
+        count = count + 1
+      end
+    end
+  end
+  if count >= amt then
+    self.state = "passed"
+  else
+    self.state = "failed"
+  end
+end
+
 --Build Ship:
 --Builds another ship that the AI can use
 --Call as:
 --ai.ch[etc]:add(ai.buildShip, nodeName, facId, class, type)
 ai.buildShip = bt.inheritsFrom(bt.node, "Build Ship")
 function ai.buildShip:run()
-  local name = uni.factions[self.id].name.." "..self.name
-  uni.spawnShip(name, self.name, self.id, uni.factions[self.id].homePlanetId)
+  local name = uni.factions[self.id].name.." "..self.args[2]
+  uni.spawnShip(name, self.args[1], uni.factions[self.id].name, uni.factions[self.id].homePlanetId)
   local id = #uni.factions[self.id].shipTab + 1
   uni.factions[self.id].shipTab[id] = {}
   uni.factions[self.id].shipTab[id].id = uni.eCnt
   uni.factions[self.id].shipTab[id].state = "idle"
+  uni.factions[self.id].shipTab[id].type = self.args[2]
+  cWin[3]:render()
   self.state = "passed"
 end
 
