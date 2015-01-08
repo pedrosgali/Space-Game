@@ -97,7 +97,13 @@ function moon:grow(dt)
     self.growthTimer = self.growthTimer + dt
     if self.growthTimer > self.growthTick then
       if self.happiness > 75 then
-        self.population = math.min(math.floor(self.population * self.growth), math.floor(uni.planetMaxPop * self.scale))
+        local birthRate = math.floor(self.population * (math.random(50, self.happiness) / 100))
+        local deathRate = math.floor(self.population * (math.random(self.happiness / 3, self.happiness) / 100))
+        self.population = math.min(math.floor(self.population + (birthRate - deathRate)), math.floor(uni.planetMaxPop * self.scale))
+        local winId = gameUtils.checkOpen(self.id)
+        if winId ~= false then
+          cWin[winId]:render()
+        end
       end
       self.growthTimer = 0
     end

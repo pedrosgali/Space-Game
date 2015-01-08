@@ -105,7 +105,7 @@ function sh:setVelocity(dt)
     local b = math.deg(self.bearing)
     local spd = self.spd
     local dist = uni.getDistance(self.x, self.y, self.tgtx, self.tgty)
-    if spd > dist then spd = dist * 2 end
+    if spd > dist then spd = math.max(dist * 2, 1) end
     if h >= b - 89 and h <= b + 89 then
         self.xVel = (math.cos(self.heading) * spd) * (dt * uni.gameSpeed) 
         self.yVel = (math.sin(self.heading) * spd) * (dt * uni.gameSpeed)
