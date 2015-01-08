@@ -2,7 +2,8 @@ local bt = require "/Lib/behaviour"
 
 local ai = {}
 
---Pass Leaf-- Good for testing, always returns "passed".
+--Pass Leaf:
+--Good for testing, always returns "passed".
 ai.passLeaf = bt.inheritsFrom(bt.node, "Test Leaf")
 function ai.passLeaf:run()
   self.state = "passed"
@@ -10,8 +11,8 @@ end
 
 
 --Check Systems:
---Gathers lists of nearby stars and finds good
-ai.checkSystems = bt.inheritsFrom(bt.node)
+--Gathers lists of nearby stars and planets
+ai.checkSystems = bt.inheritsFrom(bt.node, "Check Systems")
 function ai.checkSystems:gatherStarList()
   local id = self.id
   local homeStar = uni.factions[id].homeStarId
@@ -95,7 +96,7 @@ end
 
 --Gather Ships:
 --Gathers lists of Idle Ships.
-ai.getShipLists = bt.inheritsFrom(bt.node)
+ai.getShipLists = bt.inheritsFrom(bt.node, "Gather Ship Lists")
 function ai.getShipLists:gatherFactionShips()
   local list = uni.searchList("ship", "all", uni.factions[self.id].name)
   uni.factions[self.id].shipTab = {}
@@ -108,7 +109,8 @@ end
 
 function ai.getShipLists:gatherIdleShips()
   local count = 0
-  uni.factions[self.id].idleList = {}
+  uni.factions[self.id].idleTab = nil
+  uni.factions[self.id].idleTab = {}
   for i = 1, #uni.factions[self.id].shipTab do
     if uni.factions[self.id].shipTab[i].state == "idle" then
       count = count + 1
@@ -120,6 +122,7 @@ end
 function ai.getShipLists:run()
   if uni.factions[self.id].shipTab == nil then
     self:gatherFactionShips()
+    self:gatherIdleShips()
     self.state = "passed"
   else
     self:gatherIdleShips()
@@ -128,4 +131,35 @@ function ai.getShipLists:run()
 end
 
 
+--Build Ship:
+--Builds another ship that the AI can use
+--Call as:
+--ai.ch[etc]:add(ai.buildShip, nodeName, facId, class, type)
+ai.buildShip = bt.inheritsFrom(bt.node, "Build Ship")
+function ai.buildShip:run()
+  local name = uni.factions[self.id].name.." "..self.name
+  uni.spawnShip(name, self.name, self.id, uni.factions[self.id].homePlanetId)
+  local id = #uni.factions[self.id].shipTab + 1
+  uni.factions[self.id].shipTab[id] = {}
+  uni.factions[self.id].shipTab[id].id = uni.eCnt
+  uni.factions[self.id].shipTab[id].state = "idle"
+  self.state = "passed"
+end
+
+
+--Check Cash:
+--Checks Faction cash against the name you give it (put the number as a string when you add the node eg: "50000")
+ai.checkCash = bt.inheritsFrom(bt.node, "Check Cash")
+function ai.checkCash:run()
+  local amt = tonumber(self.name)
+  if uni.factions[self.id].cash > amt then
+    self.state = "passed"
+  else
+    self.state = "failed"
+  end
+end
+
+
+--Set Ship Type:
+--Sets an AI ship to the specified type
 return ai

@@ -11,15 +11,22 @@ bt.node = {}
 function bt.inheritsFrom(parent, name)
   local newClass = {}
   local classLookup = {__index = newClass}
-  function newClass:create(id)
+  function newClass:create(...)
+    local args = (...)
     local newinst = {}
     setmetatable(newinst, classLookup)
     newinst.name = name
-    newinst.id = id
+    newinst.id = args[1]
     newinst.state = "running"
     newinst.branches = 0
     newinst.tick = 1
     newinst.ch = {}
+    if args[2] ~= nil then
+      newinst.args = {}
+      for i = 2, #args do
+        newinst.args[i - 1] = args[i]
+      end
+    end
     return newinst
   end
   if parent then
@@ -30,7 +37,14 @@ end
 
 --NODES--
 
-function bt.node:add(object, name, id)
+function bt.node:add(...)
+  local args = {...}
+  local object = args[1]
+  local name = args[2]
+  local oTab = {}
+  for i = 3, #args do
+    oTab[i - 2] = args[i]
+  end
   if self.branches == nil then
     self.ch = {}
     self.branches = 1
@@ -38,7 +52,7 @@ function bt.node:add(object, name, id)
     self.branches = self.branches + 1
   end
   self.ch[self.branches] = {}
-  self.ch[self.branches] = object:create(id)
+  self.ch[self.branches] = object:create(oTab)
   self.ch[self.branches].name = name
 end
 
@@ -118,6 +132,23 @@ function bt.selector:run(ai)
   end
 end
 
---CONDITION--
+--INVERTER--
+
+bt.inverter = bt.inheritsFrom(bt.node, "Inverter")
+function bt.inverter:run()
+  if self.state == RUNNING then
+    local ch = self.ch[self.tick]
+    gameUtils.debug(self.name.." ["..self.tick.."]: "..ch.name)
+    local state = ch.state
+    if state == RUNNING then
+      self.ch[self.tick]:run(ai)
+    elseif state == FAILED then
+      self.state = PASSED
+    elseif state == PASSED then
+      self.state = FAILED
+    end
+  end
+end
+
 
 return bt
