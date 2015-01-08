@@ -2,7 +2,7 @@ local win = require "/Lib/screen"
 local maths = require "/Lib/maths"
 local aiCl = require "/Classes/ai"
 
-local ai = aiCl:newAi(ai)
+local ai = {}
 
 ai.type = "factory"
 ai.shipBuyPoint = 10000000
